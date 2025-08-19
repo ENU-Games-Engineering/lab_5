@@ -9,5 +9,5 @@ struct GameSystem{
     static void Load();
     static void Clean();
     static void Update(sf::RenderWindow &window);
-    static void Render();
+    static void Render(sf::RenderWindow &window);
 };

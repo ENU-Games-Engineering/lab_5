@@ -15,7 +15,7 @@ int main(){
 	while(window.isOpen()){
     window.clear();
     GameSystem::Update(window);
-    GameSystem::Render();
+    GameSystem::Render(window);
     //Wait for Vsync
     window.display();
   }

@@ -28,6 +28,7 @@ add_executable(pacman
     components.cpp
     ecm.cpp
     pacman.cpp
-    system_renderer.cpp)
+    system_renderer.cpp
+    scene.cpp)
 target_include_directories(pacman PRIVATE ${SFML_INCS} tile_level_loader)
 target_link_libraries(pacman sfml-graphics tile_level)

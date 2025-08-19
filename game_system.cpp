@@ -6,6 +6,7 @@
 #include "system_renderer.hpp"
 
 using sc = Scenes;
+using ls = LevelSystem;
 
 void GameSystem::Load() {
   // Load Scene-Local Assets
@@ -36,7 +37,7 @@ void GameSystem::Update(sf::RenderWindow &window){
 
 }
 
-void GameSystem::Render(){
+void GameSystem::Render(sf::RenderWindow &window){
   sc::active->render();
   Renderer::render();
 }

@@ -2,8 +2,10 @@
 #include "game_parameters.hpp"
 #include "components.hpp"
 #include "system_renderer.hpp"
+#include "level_system.hpp"
 
 using sc = Scenes;
+using ls = LevelSystem;
 
 std::shared_ptr<Scene> sc::game;
 std::shared_ptr<Scene> sc::menu;
@@ -23,7 +25,7 @@ void MenuScene::render() {
 }
 
 void MenuScene::load() {
-  font.loadFromFile("resources/fonts/RobotoMono-Regular.ttf");
+  font.loadFromFile("/home/leni/git/set09121_labs/lab_5/resources/fonts/RobotoMono-Regular.ttf");
   text.setFont(font);
   text.setCharacterSize(60);
 }
@@ -36,12 +38,16 @@ void GameScene::update(double dt){
 }
 
 void GameScene::render(){
+  ls::Render(Renderer::getWindow());
   Scene::render();
   _ents.render();
 
 }
 
 void GameScene::load() {
+
+  ls::loadLevelFile("/home/leni/git/set09121_labs/lab_5/resources/levels/pacman.txt",50.f);
+
   {
     std::shared_ptr<Entity> player = std::make_shared<Entity>();
     std::shared_ptr<ShapeComponent> shape = player->add_component<ShapeComponent>();
@@ -52,7 +58,7 @@ void GameScene::load() {
     std::shared_ptr<PlayerMovementComponent> comp = 
       player->add_component<PlayerMovementComponent>();
     comp->set_speed(player_speed);
-
+    player->set_position(ls::getStartPosition());
     _ents.list.push_back(player);
   }
 

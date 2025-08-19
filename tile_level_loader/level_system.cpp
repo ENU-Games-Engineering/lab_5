@@ -7,6 +7,7 @@ std::unique_ptr<LevelSystem::TILE[]> LevelSystem::_tiles;
 int LevelSystem::_width;
 int LevelSystem::_height;
 sf::Vector2f LevelSystem::_offset(0.0f, 0.0f);
+sf::Vector2f LevelSystem::_start_position;
 
 float LevelSystem::_tileSize(100.f);
 std::vector<std::unique_ptr<sf::RectangleShape>> LevelSystem::_sprites;
@@ -15,6 +16,8 @@ std::map<LevelSystem::TILE, sf::Color> LevelSystem::_colours{ {WALL, sf::Color::
 
 int LevelSystem::getHeight(){return _height;}
 int LevelSystem::getWidth(){return _width;}
+
+sf::Vector2f LevelSystem::getStartPosition(){return _start_position;}
 
 sf::Color LevelSystem::getColor(LevelSystem::TILE t) {
   auto it = _colours.find(t);
@@ -46,6 +49,7 @@ void LevelSystem::loadLevelFile(const std::string& path, float tileSize) {
   }
 
   std::vector<TILE> temp_tiles;
+  int x = 0;
   for (int i = 0; i < buffer.size(); ++i) {
     const char c = buffer[i];
     switch (c) {
@@ -54,6 +58,7 @@ void LevelSystem::loadLevelFile(const std::string& path, float tileSize) {
       break;
     case 's':
       temp_tiles.push_back(START);
+      _start_position = getTilePosition({x,h});
       break;
     case 'e':
       temp_tiles.push_back(END);
@@ -71,11 +76,13 @@ void LevelSystem::loadLevelFile(const std::string& path, float tileSize) {
       if (w == 0) { // if we haven't written width yet
         w = i;      // set width
       }
+      x = 0;
       h++; // increment height
       break;
     default:
       std::cout << c << std::endl; // Don't know what this tile type is
     }
+    x++;
   }
   if (temp_tiles.size() != (w * h)) {
     throw std::string("Can't parse level file") + path;
