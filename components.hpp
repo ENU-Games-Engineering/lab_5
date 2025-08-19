@@ -45,3 +45,27 @@ public:
 
   void update(double dt) override;
 };
+
+class EnemyAIComponent : public ActorMovementComponent {
+protected:  
+  static const sf::Vector2i directions[];
+  sf::Vector2f _direction;
+  enum state {ROAMING, ROTATING, ROTATED };
+  state _state = ROAMING;
+public:
+  EnemyAIComponent() = delete;
+  EnemyAIComponent(Entity* p);
+  void update(double dt) override;
+};
+
+class PickupComponent : public Component {
+protected:
+  bool _big;
+
+public:
+  explicit PickupComponent(Entity* p, bool big);
+  PickupComponent() = delete;
+
+  void render() override {}
+  void update(double dt) override;
+};

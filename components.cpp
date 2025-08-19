@@ -1,6 +1,10 @@
 #include "components.hpp"
+#include "game_parameters.hpp"
 #include "level_system.hpp"
 #include "system_renderer.hpp"
+#include "game_system.hpp"
+#include <iostream>
+#include <cmath>
 
 using ls = LevelSystem;
 
@@ -62,4 +66,84 @@ void PlayerMovementComponent::update(double dt){
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
     move(_speed*dt,0);
 
+}
+
+const sf::Vector2i EnemyAIComponent::directions[] = {{1, 0}, {0, 1}, {0, -1}, {-1, 0}};
+
+EnemyAIComponent::EnemyAIComponent(Entity* p)
+	: ActorMovementComponent(p) {
+    _direction = sf::Vector2f(directions[(rand()%4)]);
+  }
+
+
+void EnemyAIComponent::update(double dt) {
+  //amount to move
+  const float mva = static_cast<float>(dt * _speed);
+  //Curent position
+  const sf::Vector2f pos = _parent->get_position();
+  //Next position
+  const sf::Vector2f newpos = pos + _direction * mva;
+  //Inverse of our current direction
+  const sf::Vector2i baddir = -1 * sf::Vector2i(_direction);
+  //Random new direction
+  sf::Vector2i newdir = directions[(rand() % 4)];
+  ls::TILE current_tile = ls::getTileAt(pos);
+ switch (_state) {
+   case ROAMING:
+     if (ls::getTileAt(newpos) == ls::WALL || current_tile == ls::WAYPOINT)// Wall in front or at waypoint
+     {
+       _state = ROTATING; // start rotate
+     } else {
+      move(mva*_direction); //keep moving
+     }
+     break;
+    
+   case ROTATING:
+     while (
+        // Don't reverse
+          (newdir == baddir)
+        // and Don't pick a direction that will lead to a wall
+          && ls::getTileAt(pos+sf::Vector2f(newdir)*mva) == ls::WALL
+        ) {
+          newdir = directions[(rand() % 4)];
+         // pick new direction
+        }
+     _direction = sf::Vector2f(newdir);
+     _state = ROTATED;
+     break;
+      
+   case ROTATED:
+     //have we left the waypoint?
+     if (LevelSystem::getTileAt(pos) != LevelSystem::WAYPOINT) {
+        _state = ROAMING; //yes
+     }
+     if(ls::getTileAt(newpos) == ls::WALL)//if there is a wall in front rotate again
+      _state = ROTATING;
+     move(_direction * mva); //No
+     break;
+ }
+ ActorMovementComponent::update(dt);
+}
+
+PickupComponent::PickupComponent(Entity* p, bool big): Component(p), _big(big){}
+  
+void PickupComponent::update(double) {
+  auto vect_distance = [](sf::Vector2f a,sf::Vector2f b) -> float{
+      return sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
+  };
+  for (std::shared_ptr<Entity> e: Scenes::active->getEnts()) {       //every entity in the scene
+    if (vect_distance(_parent->get_position(),e->get_position()) < 30.f) {      //within 30.f unit of me
+      std::vector<std::shared_ptr<ActorMovementComponent>> comp = 
+        e->get_compatible_components<ActorMovementComponent>();               //get the entity ActorMovementComponent, if it has one
+      if (!comp.empty()) {        //if it has one
+        // nom nom
+        if(_big)
+          comp[0]->set_speed(comp[0]->get_speed()+big_speed_up);                      //speed the entity up
+        else
+          comp[0]->set_speed(comp[0]->get_speed()+small_speed_up);
+        _parent->set_for_delete(); //delete myself
+        break;                   //stop looking
+      }
+    }
+  }
 }

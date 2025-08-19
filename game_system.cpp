@@ -7,11 +7,14 @@
 
 using sc = Scenes;
 using ls = LevelSystem;
+std::shared_ptr<Scene> sc::game;
+std::shared_ptr<Scene> sc::menu;
+std::shared_ptr<Scene> sc::active;
 
 void GameSystem::Load() {
   // Load Scene-Local Assets
-  sc::game.reset(new GameScene());
-  sc::menu.reset(new MenuScene());
+  sc::game = std::make_unique<GameScene>();
+  sc::menu = std::make_unique<MenuScene>();
   sc::game->load();
   sc::menu->load();
   // Start at main menu
@@ -32,6 +35,12 @@ void GameSystem::Update(sf::RenderWindow &window){
         window.close();
         return;
     }
+  }
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Tab)) {
+    sc::active = sc::menu;
+  }
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+    sc::active = sc::game;
   }
   sc::active->update(dt);
 

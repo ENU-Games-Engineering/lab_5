@@ -133,3 +133,13 @@ void LevelSystem::Render(sf::RenderWindow &window) {
   }
 }
 
+std::vector<sf::Vector2i> LevelSystem::findTiles(LevelSystem::TILE type) {
+  auto v = std::vector<sf::Vector2i>();
+  for (size_t i = 0; i < _width * _height; ++i) {
+    if (_tiles[i] == type) {
+      v.push_back({i % _width, i / _width});
+    }
+  }
+
+  return v;
+}

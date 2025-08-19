@@ -2,16 +2,12 @@
 #include <memory>
 #include "scene.hpp"
 
-struct Scenes{
-  static std::shared_ptr<Scene> game;
-  static std::shared_ptr<Scene> menu;
-  static std::shared_ptr<Scene> active;
-};
+
 
 class MenuScene : public Scene {
 private:
-  sf::Text text;
-  sf::Font font;
+  sf::Text _text;
+  sf::Font _font;
 
 public:
   MenuScene() = default;
@@ -22,8 +18,11 @@ public:
 
 class GameScene : public Scene {
 private:
-  sf::Text text;
-  sf::Clock scoreClock;
+  sf::Text _text;
+  sf::Clock _score_clock;
+  std::shared_ptr<Entity> _player;
+  EntityManager _nibbles;
+  std::shared_ptr<Entity> make_nibble(const sf::Vector2i& pos, bool big);
   void respawn();
 
 public:

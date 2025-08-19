@@ -4,6 +4,11 @@
 #include "scene.hpp"
 #include "pacman.hpp"
 
+struct Scenes{
+  static std::shared_ptr<Scene> game;
+  static std::shared_ptr<Scene> menu;
+  static std::shared_ptr<Scene> active;
+};
 
 struct GameSystem{
     static void Load();
