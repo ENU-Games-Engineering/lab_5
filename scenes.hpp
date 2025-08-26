@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include "scene.hpp"
+#include "game_system.hpp"
 
 
 
@@ -11,7 +11,7 @@ private:
 
 public:
   MenuScene() = default;
-  void update(double dt) override;
+  void update(const float &dt) override;
   void render() override;
   void load()override;
 };
@@ -21,13 +21,19 @@ private:
   sf::Text _text;
   sf::Clock _score_clock;
   std::shared_ptr<Entity> _player;
+  std::vector<std::shared_ptr<Entity>> _ghosts;
   EntityManager _nibbles;
-  std::shared_ptr<Entity> make_nibble(const sf::Vector2i& pos, bool big);
+  std::shared_ptr<Entity> _make_nibble(const sf::Vector2i& pos, bool big);
   void respawn();
 
 public:
   GameScene() = default;
-  void update(double dt) override;
+  void update(const float &dt) override;
   void render() override;
   void load() override;
+};
+
+struct Scenes{
+  static std::shared_ptr<Scene> menu;
+  static std::shared_ptr<Scene> game;
 };

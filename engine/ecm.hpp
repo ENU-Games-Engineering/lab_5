@@ -6,18 +6,11 @@
 class Component; //forward declare
 
 class Entity {
-protected:
-  std::vector<std::shared_ptr<Component>> _components;
-  sf::Vector2f _position;
-  float _rotation = 0;
-  bool _alive = true;       // should be updated
-  bool _visible = true;     // should be rendered
-  bool _for_deletion = false; // should be deleted
 public:
   Entity(){}
   virtual ~Entity();
 
-  virtual void update(const double dt);
+  virtual void update(const float &dt);
   virtual void render();
   
   template <typename T, typename... Targs>
@@ -63,24 +56,31 @@ public:
   void set_for_delete();
   bool is_visible() const;
   void set_visible(bool visible);
+protected:
+  std::vector<std::shared_ptr<Component>> _components;
+  sf::Vector2f _position;
+  float _rotation = 0;
+  bool _alive = true;       // should be updated
+  bool _visible = true;     // should be rendered
+  bool _for_deletion = false; // should be deleted
 };
 
 struct EntityManager {
   std::vector<std::shared_ptr<Entity>> list;
-  void update(double dt);
+  void update(const float &dt);
   void render();
 };
 
 class Component { 
- protected:
+public:
+   Component() = delete;
+   bool is_for_deletion() const;
+   virtual void update(const float &dt) = 0;
+   virtual void render() = 0;
+   virtual ~Component();
+protected:
    Entity *const _parent;
    bool _for_deletion; // should be removed
    explicit Component(Entity *const p);
  
- public:
-   Component() = delete;
-   bool is_for_deletion() const;
-   virtual void update(double dt) = 0;
-   virtual void render() = 0;
-   virtual ~Component();
 };

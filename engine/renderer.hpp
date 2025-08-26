@@ -3,10 +3,10 @@
 
 namespace Renderer {
     void initialise(sf::RenderWindow &);
-    sf::RenderWindow &getWindow();
+    sf::RenderWindow &get_window();
     
     void shutdown();
-    void update(const double &);
+    void update(const float &);
     void queue(const sf::Drawable *s);
     void render();
 };

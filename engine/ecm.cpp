@@ -1,7 +1,7 @@
 #include "ecm.hpp"
-#include "system_renderer.hpp"
+#include "renderer.hpp"
 
-void EntityManager::update(double dt){
+void EntityManager::update(const float &dt){
   for (size_t i = 0; i < list.size(); i++) {
     if (list[i]->is_for_deletion()) {
       list.erase(list.begin() + i);
@@ -26,7 +26,7 @@ void Entity::set_position(const sf::Vector2f &pos) {
   _position = pos;
 }
 
-void Entity::update(const double dt) {
+void Entity::update(const float &dt) {
   for(std::shared_ptr<Component> &comp: _components)
     comp->update(dt);
 }

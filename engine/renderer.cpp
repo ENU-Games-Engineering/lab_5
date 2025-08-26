@@ -1,4 +1,4 @@
-#include "system_renderer.hpp"
+#include "renderer.hpp"
 #include <queue>
 
 static std::queue<const sf::Drawable *> sprites;
@@ -6,14 +6,14 @@ static sf::RenderWindow *rw;
 
 void Renderer::initialise(sf::RenderWindow &r) { rw = &r; }
 
-sf::RenderWindow &Renderer::getWindow() { return *rw; }
+sf::RenderWindow &Renderer::get_window() { return *rw; }
 
 void Renderer::shutdown() {
   while (!sprites.empty())
     sprites.pop();
 }
 
-void Renderer::update(const double &) {}
+void Renderer::update(const float &) {}
 
 void Renderer::render() {
   if (rw == nullptr) {

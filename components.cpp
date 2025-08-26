@@ -1,14 +1,17 @@
 #include "components.hpp"
 #include "game_parameters.hpp"
 #include "level_system.hpp"
-#include "system_renderer.hpp"
+#include "renderer.hpp"
 #include "game_system.hpp"
+#include "scenes.hpp"
 #include <iostream>
 #include <cmath>
 
 using ls = LevelSystem;
+using param = Parameters;
+using gs = GameSystem;
 
-void ShapeComponent::update(double dt) {
+void ShapeComponent::update(const float &dt) {
   _shape->setPosition(_parent->get_position());
 }
 
@@ -18,28 +21,24 @@ sf::Shape& ShapeComponent::get_shape() const { return *_shape; }
 
 ShapeComponent::ShapeComponent(Entity* p) : Component(p), _shape(std::make_shared<sf::CircleShape>()) {}
 
-
-
-using namespace sf;
-
-void ActorMovementComponent::update(double dt) {}
+void ActorMovementComponent::update(const float &dt) {}
 
 ActorMovementComponent::ActorMovementComponent(Entity* p)
     : _speed(100.0f), Component(p) {}
 
-bool ActorMovementComponent::valid_move(const sf::Vector2f& pos) {
-  return (ls::getTileAt(pos) != ls::WALL);
+bool ActorMovementComponent::_valid_move(const sf::Vector2f& pos) {
+  return (ls::get_tile_at(pos) != ls::WALL);
 }
 
 void ActorMovementComponent::move(const sf::Vector2f& p) {
   sf::Vector2f new_pos = _parent->get_position() + p;
-  if (valid_move(new_pos)) {
+  if (_valid_move(new_pos)) {
     _parent->set_position(new_pos);
   }
 }
 
 void ActorMovementComponent::move(float x, float y) {
-  move(Vector2f(x, y));
+  move(sf::Vector2f(x, y));
 }
 float ActorMovementComponent::get_speed() const { return _speed; }
 void ActorMovementComponent::set_speed(float speed) { _speed = speed; }
@@ -47,7 +46,7 @@ void ActorMovementComponent::set_speed(float speed) { _speed = speed; }
 PlayerMovementComponent::PlayerMovementComponent(Entity* p)
 	: ActorMovementComponent(p) {}
 
-void PlayerMovementComponent::update(double dt){
+void PlayerMovementComponent::update(const float &dt){
   sf::Vector2f new_pos(_parent->get_position().x,_parent->get_position().y);
   
   //Move up
@@ -76,7 +75,7 @@ EnemyAIComponent::EnemyAIComponent(Entity* p)
   }
 
 
-void EnemyAIComponent::update(double dt) {
+void EnemyAIComponent::update(const float &dt) {
   //amount to move
   const float mva = static_cast<float>(dt * _speed);
   //Curent position
@@ -87,10 +86,10 @@ void EnemyAIComponent::update(double dt) {
   const sf::Vector2i baddir = -1 * sf::Vector2i(_direction);
   //Random new direction
   sf::Vector2i newdir = directions[(rand() % 4)];
-  ls::TILE current_tile = ls::getTileAt(pos);
+  ls::Tile current_tile = ls::get_tile_at(pos);
  switch (_state) {
    case ROAMING:
-     if (ls::getTileAt(newpos) == ls::WALL || current_tile == ls::WAYPOINT)// Wall in front or at waypoint
+     if (ls::get_tile_at(newpos) == ls::WALL || current_tile == ls::WAYPOINT)// Wall in front or at waypoint
      {
        _state = ROTATING; // start rotate
      } else {
@@ -103,7 +102,7 @@ void EnemyAIComponent::update(double dt) {
         // Don't reverse
           (newdir == baddir)
         // and Don't pick a direction that will lead to a wall
-          && ls::getTileAt(pos+sf::Vector2f(newdir)*mva) == ls::WALL
+          && ls::get_tile_at(pos+sf::Vector2f(newdir)*mva) == ls::WALL
         ) {
           newdir = directions[(rand() % 4)];
          // pick new direction
@@ -114,10 +113,10 @@ void EnemyAIComponent::update(double dt) {
       
    case ROTATED:
      //have we left the waypoint?
-     if (LevelSystem::getTileAt(pos) != LevelSystem::WAYPOINT) {
+     if (ls::get_tile_at(pos) != ls::WAYPOINT) {
         _state = ROAMING; //yes
      }
-     if(ls::getTileAt(newpos) == ls::WALL)//if there is a wall in front rotate again
+     if(ls::get_tile_at(newpos) == ls::WALL)//if there is a wall in front rotate again
       _state = ROTATING;
      move(_direction * mva); //No
      break;
@@ -127,20 +126,20 @@ void EnemyAIComponent::update(double dt) {
 
 PickupComponent::PickupComponent(Entity* p, bool big): Component(p), _big(big){}
   
-void PickupComponent::update(double) {
+void PickupComponent::update(const float &) {
   auto vect_distance = [](sf::Vector2f a,sf::Vector2f b) -> float{
       return sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
   };
-  for (std::shared_ptr<Entity> e: Scenes::active->getEnts()) {       //every entity in the scene
+  for (std::shared_ptr<Entity> e: gs::get_active_scene()->get_entities()) {       //every entity in the scene
     if (vect_distance(_parent->get_position(),e->get_position()) < 30.f) {      //within 30.f unit of me
       std::vector<std::shared_ptr<ActorMovementComponent>> comp = 
         e->get_compatible_components<ActorMovementComponent>();               //get the entity ActorMovementComponent, if it has one
       if (!comp.empty()) {        //if it has one
         // nom nom
         if(_big)
-          comp[0]->set_speed(comp[0]->get_speed()+big_speed_up);                      //speed the entity up
+          comp[0]->set_speed(comp[0]->get_speed()+param::big_speed_up);                      //speed the entity up
         else
-          comp[0]->set_speed(comp[0]->get_speed()+small_speed_up);
+          comp[0]->set_speed(comp[0]->get_speed()+param::small_speed_up);
         _parent->set_for_delete(); //delete myself
         break;                   //stop looking
       }

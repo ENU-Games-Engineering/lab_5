@@ -2,13 +2,11 @@
 #include "ecm.hpp"
 
 class ShapeComponent : public Component {
-protected:
-  std::shared_ptr<sf::Shape> _shape;
 public:
   ShapeComponent() = delete;
-  explicit ShapeComponent(Entity *p);
+  explicit ShapeComponent(Entity *const p);
 
-  void update(double dt) override;
+  void update(const float &dt) override;
   void render() override;
 
   sf::Shape &get_shape() const;
@@ -17,13 +15,11 @@ public:
   void set_shape(Targs... params) {
     _shape.reset(new T(params...));
   }
+protected:
+  std::shared_ptr<sf::Shape> _shape;
 };
 
 class ActorMovementComponent : public Component {
-protected:
-  bool valid_move(const sf::Vector2f&);
-  float _speed;
-
 public:
   explicit ActorMovementComponent(Entity* p);
   ActorMovementComponent() = delete;
@@ -35,7 +31,10 @@ public:
   void move(float x, float y);
 
   void render() override {}
-  void update(double dt) override;
+  void update(const float &dt) override;
+protected:
+  bool _valid_move(const sf::Vector2f&);
+  float _speed;
 };
 
 class PlayerMovementComponent : public ActorMovementComponent{
@@ -43,7 +42,7 @@ public:
   PlayerMovementComponent() = delete;
   PlayerMovementComponent(Entity* p);
 
-  void update(double dt) override;
+  void update(const float &dt) override;
 };
 
 class EnemyAIComponent : public ActorMovementComponent {
@@ -55,7 +54,7 @@ protected:
 public:
   EnemyAIComponent() = delete;
   EnemyAIComponent(Entity* p);
-  void update(double dt) override;
+  void update(const float &dt) override;
 };
 
 class PickupComponent : public Component {
@@ -67,5 +66,5 @@ public:
   PickupComponent() = delete;
 
   void render() override {}
-  void update(double dt) override;
+  void update(const float &dt) override;
 };

@@ -2,23 +2,16 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include "game_parameters.hpp"
-#include "game_system.hpp"
-#include "pacman.hpp"
-#include "system_renderer.hpp"
+#include "scenes.hpp"
 
-sf::Texture spritesheet;
+using param = Parameters;
 
 int main(){
-  sf::RenderWindow window(sf::VideoMode({game_width, game_height}), "SPACE Invaders");
-  Renderer::initialise(window);
-  GameSystem::Load();
-	while(window.isOpen()){
-    window.clear();
-    GameSystem::Update(window);
-    GameSystem::Render(window);
-    //Wait for Vsync
-    window.display();
-  }
-  GameSystem::Clean();
+  Scenes::menu = std::make_shared<MenuScene>();
+  Scenes::menu->load();
+  Scenes::game = std::make_shared<GameScene>();
+  Scenes::game->load();
+  GameSystem::set_active_scene(Scenes::menu);
+  GameSystem::start(param::game_width,param::game_height,"pacman",param::time_step);
   return 0;
 }
